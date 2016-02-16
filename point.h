@@ -20,7 +20,7 @@ public:
     bool isCodirectional(Point *p);
     long lenQuad();
 private:
-    long x, y;
+    long x, y, z;
 };
 
 #endif // POINT_H
