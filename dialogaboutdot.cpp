@@ -25,10 +25,11 @@ void DialogAboutDot::enterReferencePoint()
         ui->messageLabel->setText(tr("Мало координат, что-то пропустили"));
         return;
     }
-    long x0, y0, x1, y1;
+    long x0, y0, z0, x1, y1, z1;
     bool ok = true;
     x0 = srcArgs.takeFirst().toLong(&ok, 10);
     y0 = srcArgs.takeFirst().toLong(&ok, 10);
+    z0 = srcArgs.takeFirst().toLong(&ok, 10);
     if (!indicator) {
         srcArgs = ui->distLineEdit->text().split(QChar(' '));
         if (srcArgs.length()<2) {
@@ -38,10 +39,11 @@ void DialogAboutDot::enterReferencePoint()
     }
     x1 = srcArgs.takeFirst().toLong(&ok, 10);
     y1 = srcArgs.takeFirst().toLong(&ok, 10);
+    z1 = srcArgs.takeFirst().toLong(&ok, 10);
     ui->sourceLineEdit->clear();
     ui->distLineEdit->clear();
-    outSrc.append(Point(x0, y0));
-    outDst.append(Point(x1, y1));
+    outSrc.append(Point(x0, y0, z0));
+    outDst.append(Point(x1, y1, z1));
     switch(outSrc.length()) {
     case 0:
         ui->messageLabel->setText(tr("Не введено ни одной точки. Отображение идентичное"));

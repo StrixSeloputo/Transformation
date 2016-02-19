@@ -132,10 +132,6 @@ void Picture::getNewImage(Image *dst)
     getNewScale();
     long h = abs(maxNewY-minNewY+1);
     long w = abs(maxNewX-minNewX+1);
-    if (newPix != NULL)
-        delete []newPix;
-    if (count != NULL)
-        delete []count;
     newPix = new unsigned char[3*h*w];
     count = new long[h*w];
     for(int i = 0; i < 3*w*h; i++)
@@ -148,10 +144,8 @@ void Picture::getNewImage(Image *dst)
     for (long i = minNewX; di*i < di*maxNewX; i+= di) {
         for (long j = minNewY; dj*j < dj*maxNewY; j+= dj) {
             //выясняем цвет исходной точки и красим в него
-            M = invM->transformPoint(i, j);
+            M = invM->transformPoint(i, j, 0l);
             if ((M->X()>=0 && M->X()<width) && (M->Y()>=0 && M->Y()<height)) {
-//                if (((M->X()<2) || (abs(M->X()-width+1)<2)) && ((M->Y()<2) || (abs(M->Y()-height+1)<2)))
-//                    qDebug("(%ld %ld) - > (%ld %ld) %ld", M->X(), M->Y(), i, j, indexOnNew(i, j));
                 DrawPixelLikeThis(i, j, pix(M->X(), M->Y()));
                 countAck++;
             }
@@ -214,10 +208,10 @@ void Picture::DrawPixelLikeThis(long x, long y, unsigned char *pix)
 void Picture::getNewScale()
 {
     Point *M0, *M1, *M2, *M3;
-    M0 = matrix->transformPoint(0l,0l);
-    M1 = matrix->transformPoint(0l, height-1);
-    M2 = matrix->transformPoint(width-1, 0l);
-    M3 = matrix->transformPoint(width-1, height-1);
+    M0 = matrix->transformPoint(0l,0l, 0l);
+    M1 = matrix->transformPoint(0l, height-1, 0l);
+    M2 = matrix->transformPoint(width-1, 0l, 0l);
+    M3 = matrix->transformPoint(width-1, height-1, 0l);
 
     minNewX = min(M0->X(), M1->X(), M2->X(), M3->X());
     maxNewX = max(M0->X(), M1->X(), M2->X(), M3->X());
@@ -233,10 +227,10 @@ void Picture::getNewScale()
     Point *P0, *P1, *P2, *P3;
     MatrixOfTransformation *inverse = matrix->getInverseMatrix();
     qDebug("reverse");
-    P0 = inverse->transformPoint(M0->X(), M0->Y());
-    P1 = inverse->transformPoint(M1->X(), M1->Y());
-    P2 = inverse->transformPoint(M2->X(), M2->Y());
-    P3 = inverse->transformPoint(M3->X(), M3->Y());
+    P0 = inverse->transformPoint(M0->X(), M0->Y(), M0->Z());
+    P1 = inverse->transformPoint(M1->X(), M1->Y(), M1->Z());
+    P2 = inverse->transformPoint(M2->X(), M2->Y(), M2->Z());
+    P3 = inverse->transformPoint(M3->X(), M3->Y(), M3->Z());
     qDebug("(%ld %ld) - > (%ld %ld) %ld", M0->X(), M0->Y(), P0->X(), P0->Y(), indexOnNew(P0->X(), P0->Y()));
     qDebug("(%ld %ld) - > (%ld %ld) %ld", M1->X(), M1->Y(), P1->X(), P1->Y(), indexOnNew(P1->X(), P1->Y()));
     qDebug("(%ld %ld) - > (%ld %ld) %ld", M2->X(), M2->Y(), P2->X(), P2->Y(), indexOnNew(P2->X(), P2->Y()));
