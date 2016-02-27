@@ -1,6 +1,9 @@
 #ifndef DIALOGABOUTTESTMATRIX_H
 #define DIALOGABOUTTESTMATRIX_H
 
+#define SIZE                    9
+#define ORD                     3
+
 #include <QDialog>
 
 namespace Ui {

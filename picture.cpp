@@ -77,7 +77,7 @@ void Picture::setTestMatrix(double *U) {
     if (matrix->isEq(U)) return;
     needTransform = (pixs != NULL);
    // qDebug((needTransform ? "true" : "false"));
-    matrix->setTestMatrix(U);
+    matrix->setMatrix(U);
 }
 void Picture::setImage(QImage img)
 {
@@ -115,7 +115,7 @@ long Picture::index(long x, long y)
 }
 long Picture::index(Point *p)
 {
-    return index(p->X(), p->Y());
+    return index(p->X(0), p->X(1));
 }
 ////////////////////////////
 QImage Picture::getImage()
@@ -145,8 +145,8 @@ void Picture::getNewImage(Image *dst)
         for (long j = minNewY; dj*j < dj*maxNewY; j+= dj) {
             //выясняем цвет исходной точки и красим в него
             M = invM->transformPoint(i, j, 0l);
-            if ((M->X()>=0 && M->X()<width) && (M->Y()>=0 && M->Y()<height)) {
-                DrawPixelLikeThis(i, j, pix(M->X(), M->Y()));
+            if ((M->X(0)>=0 && M->X(0)<width) && (M->X(1)>=0 && M->X(1)<height)) {
+                DrawPixelLikeThis(i, j, pix(M->X(0), M->X(1)));
                 countAck++;
             }
             delete M;
@@ -213,26 +213,26 @@ void Picture::getNewScale()
     M2 = matrix->transformPoint(width-1, 0l, 0l);
     M3 = matrix->transformPoint(width-1, height-1, 0l);
 
-    minNewX = min(M0->X(), M1->X(), M2->X(), M3->X());
-    maxNewX = max(M0->X(), M1->X(), M2->X(), M3->X());
-    minNewY = min(M0->Y(), M1->Y(), M2->Y(), M3->Y());
-    maxNewY = max(M0->Y(), M1->Y(), M2->Y(), M3->Y());
+    minNewX = min(M0->X(0), M1->X(0), M2->X(0), M3->X(0));
+    maxNewX = max(M0->X(0), M1->X(0), M2->X(0), M3->X(0));
+    minNewY = min(M0->X(1), M1->X(1), M2->X(1), M3->X(1));
+    maxNewY = max(M0->X(1), M1->X(1), M2->X(1), M3->X(1));
     qDebug("new diag: (%ld; %ld) <-> (%ld; %ld) old w & h: %ld %ld", minNewX, minNewY, maxNewX, maxNewY, width, height);
     qDebug("rigth");
-    qDebug("(%ld %ld) - > (%ld %ld) %ld", 0l, 0l, M0->X(), M0->Y(), indexOnNew(M0->X(), M0->Y()));
-    qDebug("(%ld %ld) - > (%ld %ld) %ld", 0l, height-1, M1->X(), M1->Y(), indexOnNew(M1->X(), M1->Y()));
-    qDebug("(%ld %ld) - > (%ld %ld) %ld", width-1, 0l, M2->X(), M2->Y(), indexOnNew(M2->X(), M2->Y()));
-    qDebug("(%ld %ld) - > (%ld %ld) %ld", width-1, height-1, M3->X(), M3->Y(), indexOnNew(M3->X(), M3->Y()));
+    qDebug("(%ld %ld) - > (%ld %ld) %ld", 0l, 0l, M0->X(0), M0->X(1), indexOnNew(M0->X(0), M0->X(1)));
+    qDebug("(%ld %ld) - > (%ld %ld) %ld", 0l, height-1, M1->X(0), M1->X(1), indexOnNew(M1->X(0), M1->X(1)));
+    qDebug("(%ld %ld) - > (%ld %ld) %ld", width-1, 0l, M2->X(0), M2->X(1), indexOnNew(M2->X(0), M2->X(1)));
+    qDebug("(%ld %ld) - > (%ld %ld) %ld", width-1, height-1, M3->X(0), M3->X(1), indexOnNew(M3->X(0), M3->X(1)));
 
     Point *P0, *P1, *P2, *P3;
     MatrixOfTransformation *inverse = matrix->getInverseMatrix();
     qDebug("reverse");
-    P0 = inverse->transformPoint(M0->X(), M0->Y(), M0->Z());
-    P1 = inverse->transformPoint(M1->X(), M1->Y(), M1->Z());
-    P2 = inverse->transformPoint(M2->X(), M2->Y(), M2->Z());
-    P3 = inverse->transformPoint(M3->X(), M3->Y(), M3->Z());
-    qDebug("(%ld %ld) - > (%ld %ld) %ld", M0->X(), M0->Y(), P0->X(), P0->Y(), indexOnNew(P0->X(), P0->Y()));
-    qDebug("(%ld %ld) - > (%ld %ld) %ld", M1->X(), M1->Y(), P1->X(), P1->Y(), indexOnNew(P1->X(), P1->Y()));
-    qDebug("(%ld %ld) - > (%ld %ld) %ld", M2->X(), M2->Y(), P2->X(), P2->Y(), indexOnNew(P2->X(), P2->Y()));
-    qDebug("(%ld %ld) - > (%ld %ld) %ld", M3->X(), M3->Y(), P3->X(), P3->Y(), indexOnNew(P3->X(), P3->Y()));
+    P0 = inverse->transformPoint(M0->X(0), M0->X(1), M0->X(2));
+    P1 = inverse->transformPoint(M1->X(0), M1->X(1), M1->X(2));
+    P2 = inverse->transformPoint(M2->X(0), M2->X(1), M2->X(2));
+    P3 = inverse->transformPoint(M3->X(0), M3->X(1), M3->X(2));
+    qDebug("(%ld %ld) - > (%ld %ld) %ld", M0->X(0), M0->X(1), P0->X(0), P0->X(1), indexOnNew(P0->X(0), P0->X(1)));
+    qDebug("(%ld %ld) - > (%ld %ld) %ld", M1->X(0), M1->X(1), P1->X(0), P1->X(1), indexOnNew(P1->X(0), P1->X(1)));
+    qDebug("(%ld %ld) - > (%ld %ld) %ld", M2->X(0), M2->X(1), P2->X(0), P2->X(1), indexOnNew(P2->X(0), P2->X(1)));
+    qDebug("(%ld %ld) - > (%ld %ld) %ld", M3->X(0), M3->X(1), P3->X(0), P3->X(1), indexOnNew(P3->X(0), P3->X(1)));
 }

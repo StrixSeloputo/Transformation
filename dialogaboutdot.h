@@ -1,6 +1,8 @@
 #ifndef DIALOGABOUTDOT_H
 #define DIALOGABOUTDOT_H
 
+#define ORD                     3
+
 #include <QDialog>
 
 class Point;

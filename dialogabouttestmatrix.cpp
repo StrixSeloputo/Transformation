@@ -11,9 +11,9 @@ DialogAboutTestMatrix::DialogAboutTestMatrix(QWidget *parent) :
     ui(new Ui::DialogAboutTestMatrix)
 {
     ui->setupUi(this);
-    U = new double [6];
-    for (int i = 0; i < 6; i++) U[i] = 0;
-    U[0] = U[4] = 1; // E-matrix
+    U = new double [SIZE];
+    for (int i = 0; i < SIZE; i++) U[i] = 0;
+    for (int i = 0; i < ORD; i++) U[i+ORD*i] = 1; // E-matrix
     connect(ui->applyButton, SIGNAL(clicked()), this, SLOT(apply()));
     connect(ui->clearButton, SIGNAL(clicked()), this, SLOT(clearEnter()));
 }
@@ -32,8 +32,9 @@ void DialogAboutTestMatrix::accept()
 }
 void DialogAboutTestMatrix::apply()
 {
-    double W[6] = { 1, 0, 0,
-                    0, 1, 0 };
+    double W[SIZE] = {  1, 0, 0,
+                        0, 1, 0,
+                        0, 1, 0};
     if(ui->homothetyRadioButton->isChecked()) {
         qDebug("homothety is selected");
         double ox = 1, oy = 1;

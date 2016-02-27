@@ -1,6 +1,9 @@
+
 #include "dialogaboutdot.h"
 #include "ui_dialogaboutdot.h"
 #include "point.h"
+
+#define     ORD     3
 
 DialogAboutDot::DialogAboutDot(QWidget *parent) :
     QDialog(parent),
@@ -21,29 +24,28 @@ void DialogAboutDot::enterReferencePoint()
     bool indicator = ui->checkBox->checkState();
     QString src = ui->sourceLineEdit->text();
     QStringList srcArgs = src.split(QChar(' '));
-    if ((srcArgs.length()<2) || (indicator && srcArgs.length()<4)) {
+    if ((srcArgs.length()<ORD) || (indicator && srcArgs.length()<2*ORD)) {
         ui->messageLabel->setText(tr("Мало координат, что-то пропустили"));
         return;
     }
-    long x0, y0, z0, x1, y1, z1;
+    long X[ORD], U[ORD];
     bool ok = true;
-    x0 = srcArgs.takeFirst().toLong(&ok, 10);
-    y0 = srcArgs.takeFirst().toLong(&ok, 10);
-    z0 = srcArgs.takeFirst().toLong(&ok, 10);
+    for (int i = 0; i < ORD; i++)
+        X[i] = srcArgs.takeFirst().toLong(&ok, 10);
     if (!indicator) {
         srcArgs = ui->distLineEdit->text().split(QChar(' '));
-        if (srcArgs.length()<2) {
+        if (srcArgs.length()<ORD) {
             ui->messageLabel->setText(tr("Мало координат, что-то пропустили"));
             return;
         }
     }
-    x1 = srcArgs.takeFirst().toLong(&ok, 10);
-    y1 = srcArgs.takeFirst().toLong(&ok, 10);
-    z1 = srcArgs.takeFirst().toLong(&ok, 10);
+    for (int i = 0; i < ORD; i++)
+        U[i] = srcArgs.takeFirst().toLong(&ok, 10);
     ui->sourceLineEdit->clear();
     ui->distLineEdit->clear();
-    outSrc.append(Point(x0, y0, z0));
-    outDst.append(Point(x1, y1, z1));
+    Point p_x(X), p_u(U);
+    outSrc.append(p_x);
+    outDst.append(p_u);
     switch(outSrc.length()) {
     case 0:
         ui->messageLabel->setText(tr("Не введено ни одной точки. Отображение идентичное"));

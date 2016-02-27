@@ -12,7 +12,10 @@ class MatrixOfTransformation
 {
 public:
     MatrixOfTransformation();
+    MatrixOfTransformation(double U[]);
     MatrixOfTransformation(QList<Point> src, QList<Point> dst);
+
+    double T(int i, int j) const;
     double *getMatrix();
     MatrixOfTransformation *getInverseMatrix();
     double det();
@@ -22,18 +25,19 @@ public:
     Point *transformPoint(long x, long y, long z);
     Point *transformPoint(Point *p, bool resInThis = true);
     Point *setNewValue(QList<Point>src, QList<Point>dst);
-public slots:
+
+//public slots:
     void mulOnTestMatrix(double U[]);
-    void setTestMatrix(double *U);
+    void setMatrix(double *U);
 private:
-    double T[SIZE];      //has type:
+    double _T[SIZE];      //has type:
                         //  (a11    a12     a13 |   b1)
                         //  (a21    a22     a23 |   b2)
                         //  (a31    a23     a33 |   b3)
     bool helper(QList<Point> &src, QList<Point> &dst);
     //для вычислений с количеством опорных точек не меньшим трех, не лежащих на одной прямой
-    double *B();
-    double *A();
+
+    QString showMatrix(double U[]);
 };
 
 #endif // MATRIXOFTRANSFORMATION_H

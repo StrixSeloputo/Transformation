@@ -2,6 +2,7 @@
 #include <float.h>
 #include <math.h>
 
+#include <QtGlobal>
 #include <QtGui>
 #include <QList>
 #include <QMessageBox>
@@ -13,8 +14,23 @@
 MatrixOfTransformation::MatrixOfTransformation()
 {
     //единничная матрица
-    for (int i = 0; i < SIZE; i++) T[i] = 0;
-    for (int i = 1; i < ORD; i++) T[i+ORD*i] = 0;
+    for (int i = 0; i < SIZE; i++) _T[i] = 0;
+    for (int i = 0; i < ORD; i++) _T[i+ORD*i] = 1;
+}
+
+MatrixOfTransformation::MatrixOfTransformation(double U[])
+{
+    try {
+        for (int i = 0; i < SIZE; i++)
+            _T[i] = U[i];
+    } catch (...) {
+        qFatal("Invalid initialization MatrixOfTransformation::MatrixOfTransformation(double[])");
+    }
+}
+
+double MatrixOfTransformation::T(int i, int j) const
+{
+    return _T[i*ORD+j];
 }
 
 MatrixOfTransformation::MatrixOfTransformation(QList<Point> src, QList<Point> dst)
@@ -22,54 +38,47 @@ MatrixOfTransformation::MatrixOfTransformation(QList<Point> src, QList<Point> ds
     if (helper(src, dst)) return;
 
     //единничная матрица
-    for (int i = 0; i < SIZE; i++) T[i] = 0;
-    for (int i = 1; i < ORD; i++) T[i+ORD*i] = 0;
+    for (int i = 0; i < SIZE; i++) _T[i] = 0;
+    for (int i = 0; i < ORD; i++) _T[i+ORD*i] = 1;
 
-    Point p0, p1, q1, q0, r1, r0, *u, *v, *y, *z;
+    Point p0, p1, q1, q0, r1, r0, u, v, y, z;
 
     switch (src.length()) {
     case 1:
         p0 = src.takeFirst();
         p1 = dst.takeFirst();
-        z = new Point(&p1);
-        z->subVector(&p0);              //сдвиг на вектор p1->p0
+        z = p1-p0;                  //сдвиг на вектор p1->p0
 onlyOnePoint:
         qDebug("Только одна точка. Или больше, но все совпадают");
         // Обычный перенос, который не изменит вид изображения
-        delete z;
         return;
     case 2:
         p0 = src.takeFirst();
         p1 = dst.takeFirst();
         q0 = src.takeFirst();
         q1 = dst.takeFirst();
-        y = new Point(q1);
-        y->subVector(&p1);          //вектор p1->q1 (на иск изобр-ии)
-        z = new Point(q0);
-        z->subVector(&p0);          //вектор p0->q0 (на исх изобр-ии)
+        y = q1-p1;                  //вектор p1->q1 (на иск изобр-ии)
+        z = q0-p0;                  //вектор p0->q0 (на исх изобр-ии)
   onlyTwoPoints:
         qDebug("Только две точки. Или больше, но все на одной прямой");
         // Растяжение вдоль вектора + поворот на плоскости до совпадения векторов на исх и иск изобр-ях
-        if (z->X() != 0) {
-            T[0] = y->X() / z->X();
-            T[1] = 0;
-            T[2] = p1.X() - T[0]*p0.X();
-            T[3] = y->Y() / z->X();
-            T[4] = 0;
-            T[5] = p1.Y() - T[3]*p0.X();
-        } else if (z->Y() != 0) {
-            T[0] = 0;
-            T[1] = y->X() / z->Y();
-            T[2] = p1.X() - T[1]*p0.Y();
-            T[3] = 0;
-            T[4] = y->Y() / z->Y();
-            T[5] = p1.Y() - T[4]*p0.Y();
+        if (z.X(0) != 0) {
+            _T[0] = y.X(0) / z.X(0);
+            _T[1] = 0;
+            _T[2] = p1.X(0) - _T[0]*p0.X(0);
+            _T[3] = y.X(1) / z.X(0);
+            _T[4] = 0;
+            _T[5] = p1.X(1) - _T[3]*p0.X(0);
+        } else if (z.X(1) != 0) {
+            _T[0] = 0;
+            _T[1] = y.X(0) / z.X(1);
+            _T[2] = p1.X(0) - _T[1]*p0.X(1);
+            _T[3] = 0;
+            _T[4] = y.X(1) / z.X(1);
+            _T[5] = p1.X(1) - _T[4]*p0.X(1);
         } else {
-            delete y;
             goto onlyOnePoint;
         }
-        delete y;
-        delete z;
         return;
     default:
         qDebug("Было введено больше 3-х точек, но система совместна");
@@ -78,60 +87,47 @@ onlyOnePoint:
         p1 = dst.takeFirst();
         q0 = src.takeFirst();
         q1 = dst.takeFirst();
-        y = new Point(q1);
-        y->subVector(&p1);          //вектор p1->r1
-        z = new Point(q0);
-        z->subVector(&p0);          //вектор p0->r0
+        y = q1-p1;          //вектор p1->r1
+        z = q0-p0;          //вектор p0->r0
         r0 = src.takeFirst();
         r1 = dst.takeFirst();
-        u = new Point(r1);
-        u->subVector(&p1);
-        v = new Point(r0);
-        v->subVector(&p0);
-        for(;v->isColinear(z) && u->isColinear(y);) {
+        u = r1-p1;
+        v = r0-p0;
+        for(;v.isColinear(z) && u.isColinear(y);) {
             if (src.isEmpty()) {
-                delete u;
-                delete v;
                 goto onlyTwoPoints;
             }
             r0 = src.takeFirst();
             r1 = dst.takeFirst();
-            u = new Point(r1);
-            u->subVector(&p1);
-            v = new Point(r0);
-            v->subVector(&p0);
+            u = r1-p1;
+            v = r0-p0;
         }
-        double det0 = v->Y()*z->X() - z->Y()*v->X();
+        double det0 = v.X(1)*z.X(0) - z.X(1)*v.X(0);
         if (det0 == 0) {
             qDebug("No colinear but colinear");
             return;
         }
-        T[1] = (z->X()*u->X() - y->X()*v->X()) / det0;
-        if (z->X() != 0) {
-            T[0] = T[1]*z->Y()/z->X() + y->X()/z->X();
-        } else if (v->X() != 0) {
-            T[0] = T[1]*v->Y()/v->X() + u->X()/v->X();
+        _T[1] = (z.X(0)*u.X(0) - y.X(0)*v.X(0)) / det0;
+        if (z.X(0) != 0) {
+            _T[0] = _T[1]*z.X(1)/z.X(0) + y.X(0)/z.X(0);
+        } else if (v.X(0) != 0) {
+            _T[0] = _T[1]*v.X(1)/v.X(0) + u.X(0)/v.X(0);
         } else {
             qDebug("No colinear but colinear");
             return;
         }
-        T[2] = p1.X() - T[0]*p0.X() - T[1]*p0.Y();
+        _T[2] = p1.X(0) - _T[0]*p0.X(0) - _T[1]*p0.X(1);
 
-        T[4] = (z->X()*u->Y() - y->Y()*v->X()) / det0;
-        if (z->Y() != 0) {
-            T[3] = T[1]*z->Y()/z->X() + y->Y()/z->X();
-        } else if (v->Y() != 0) {
-            T[3] = T[1]*v->Y()/v->X() + u->Y()/v->X();
+        _T[4] = (z.X(0)*u.X(1) - y.X(1)*v.X(0)) / det0;
+        if (z.X(1) != 0) {
+            _T[3] = _T[1]*z.X(1)/z.X(0) + y.X(1)/z.X(0);
+        } else if (v.X(1) != 0) {
+            _T[3] = _T[1]*v.X(1)/v.X(0) + u.X(1)/v.X(0);
         } else {
             qDebug("No colinear but colinear");
             return;
         }
-        T[5] = p1.Y() - T[3]*p0.X() - T[4]*p0.Y();
-
-        delete u;
-        delete v;
-        delete y;
-        delete z;
+        _T[5] = p1.X(1) - _T[3]*p0.X(0) - _T[4]*p0.X(1);
         return;
     }
 }
@@ -219,8 +215,8 @@ bool MatrixOfTransformation::helper(QList<Point> &src, QList<Point> &dst)
     double MXX[SIZE] = { 0 }, MUX[SIZE] = { 0 };    // n x n
     for (long k = 0; k < count; k++)
     {
-        long X[ORD] = { src[k].X(), src[k].Y(), src[k].Z() };
-        long U[ORD] = { dst[k].X(), dst[k].Y(), dst[k].Z() };
+        long X[ORD] = { src[k].X(0), src[k].X(1), src[k].X(2) };
+        long U[ORD] = { dst[k].X(0), dst[k].X(1), dst[k].X(2) };
         for (int i = 0; i < ORD; i++) {
             MX[i] += X[i];
             MU[i] += U[i];
@@ -235,9 +231,9 @@ bool MatrixOfTransformation::helper(QList<Point> &src, QList<Point> &dst)
     double *InvXX = inverse(MXX);
     for (int i = 0; i < ORD; i++) {
         for (int j = 0; j < ORD; j++) {
-            T[i*ORD+j] = 0;
+            _T[i*ORD+j] = 0;
             for (int k = 0; k < ORD; k++)
-                T[i*ORD+j] += MUX[i*ORD+k]*InvXX[k*ORD+j];
+                _T[i*ORD+j] += MUX[i*ORD+k]*InvXX[k*ORD+j];
         }
     }
     return true;
@@ -245,8 +241,8 @@ bool MatrixOfTransformation::helper(QList<Point> &src, QList<Point> &dst)
 
 Point *MatrixOfTransformation::transformPoint(long x, long y, long z)
 {
-    Point *p = new Point(x, y, z);
-    return transformPoint(p);
+    //Point *p = new Point(x, y, z);
+    //return transformPoint(p);
 }
 long sign(double x) {
     if (x == 0) return 0;
@@ -272,57 +268,53 @@ long toLong(double x)
 
 Point *MatrixOfTransformation::transformPoint(Point *p, bool resInThis)
 {
-    long u = toLong(T[0]*p->X()) + toLong(T[1]*p->Y()) + toLong(T[2]*p->Z());
-    long v = toLong(T[3]*p->X()) + toLong(T[4]*p->Y()) + toLong(T[5]*p->Z());
-    long w = toLong(T[6]*p->X()) + toLong(T[7]*p->Y()) + toLong(T[8]*p->Z());
-    Point *t = new Point(u, v, w);
-    if (!resInThis) return t;
-    delete p;
-    return p=t;
+    long u = toLong(_T[0]*p->X(0)) + toLong(_T[1]*p->X(1)) + toLong(_T[2]*p->X(2));
+    long v = toLong(_T[3]*p->X(0)) + toLong(_T[4]*p->X(1)) + toLong(_T[5]*p->X(2));
+    long w = toLong(_T[6]*p->X(0)) + toLong(_T[7]*p->X(1)) + toLong(_T[8]*p->X(2));
+    //Point *t = new Point(u, v, w);
+    //if (!resInThis) return t;
+    //delete p;
+    //return p=t;
 }
 
 double MatrixOfTransformation::det()
 {
-//    double  det = 0;          // 0 1 2
-//    double  sgn = 1;          // 3 4 5
-//    bool    has_row = true;   // 6 7 8
-//    double W[SIZE];
-//    for (int i = 0; i < SIZE; i++) W[i] = T[i];
-    return T[0]*(T[4]*T[8]-T[5]*T[7]) - T[1]*(T[3]*T[8]-T[5]*T[6]) + T[2]*(T[3]*T[7]-T[4]*T[6]);
+//////////////////////
+    return _T[0]*(_T[4]*_T[8]-_T[5]*_T[7]) - _T[1]*(_T[3]*_T[8]-_T[5]*_T[6]) + _T[2]*(_T[3]*_T[7]-_T[4]*_T[6]);
 }
 MatrixOfTransformation *MatrixOfTransformation::getInverseMatrix()
 {
-//    MatrixOfTransformation *m = new MatrixOfTransformation();
-//    double d = det();
-//    if (d != 0) {
-//        m->T[0] =  T[4]/d;
-//        m->T[1] = -T[1]/d;
-//        m->T[2] = -T[2];
-//        m->T[3] = -T[3]/d;
-//        m->T[4] =  T[0]/d;
-//        m->T[5] = -T[5];
-//    } else {
-//        QMessageBox::information(0, "Transformation",
-//                                 "Cannot reverse matrix of transformation");
-//    }
-//    return m;
+    MatrixOfTransformation *M = new MatrixOfTransformation();
+    M->setMatrix(inverse(_T));
+    return M;
 }
 
 QString MatrixOfTransformation::showMatrix()
 {
-///////////////////////
-//    return QString::asprintf("\t%.2lf\t%.2lf\t%.2lf\n\t%.2lf\t%.2lf\t%.2lf\n\t0.00\t0.00\t1.00\n", T[0], T[1], T[2], T[3], T[4], T[5]);
+    return showMatrix(_T);
 }
+QString MatrixOfTransformation::showMatrix(double U[])
+{
+    QString s = "";
+    for (int i = 0; i < SIZE; i++) {
+        if (i % ORD == 2)
+            s.append(QString::asprintf("\t%.2lf\n", U[i]));
+        else
+            s.append(QString::asprintf("\t%.2lf", U[i]));
+    }
+    return s;
+}
+
 bool MatrixOfTransformation::isEq(MatrixOfTransformation *m)
 {
     bool eq = true;
-    for(int i = 0; i < SIZE; i++) eq &= (T[i] == m->T[i]);
+    for(int i = 0; i < SIZE; i++) eq &= (_T[i] == m->_T[i]);
     return eq;
 }
 bool MatrixOfTransformation::isEq(double *U)
 {
     bool eq = true;
-    for(int i = 0; i < SIZE; i++) eq &= (T[i] == U[i]);
+    for(int i = 0; i < SIZE; i++) eq &= (_T[i] == U[i]);
     return eq;
 }
 
@@ -334,15 +326,13 @@ void MatrixOfTransformation::mulOnTestMatrix(double U[])
         for (int j = 0; j < ORD; j++) {
             W[i+3*j] = 0;
             for (int k = 0; k < ORD; k++)
-                W[i+ORD*j] += U[k+ORD*j]*T[i+ORD*k];
+                W[i+ORD*j] += U[k+ORD*j]*_T[i+ORD*k];
         }
     }
-    for(int i = 0; i < SIZE; i++) T[i] = W[i];
+    for(int i = 0; i < SIZE; i++) _T[i] = W[i];
 }
-void MatrixOfTransformation::setTestMatrix(double *U)
+void MatrixOfTransformation::setMatrix(double *U)
 {
-/////////////////////
-//    qDebug("\t%.2lf\t%.2lf\t%.2lf\n\t%.2lf\t%.2lf\t%.2lf\n\t0.00\t0.00\t1.00\n", U[0], U[1], U[2], U[3], U[4], U[5]);
-//    for (int i = 0; i < 6; i++) T[i] = U[i];
-//    showMatrix();
+    qDebug() << showMatrix(U);
+    for (int i = 0; i < SIZE; i++) _T[i] = U[i];
 }
