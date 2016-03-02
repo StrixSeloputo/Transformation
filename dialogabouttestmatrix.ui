@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>502</width>
-    <height>368</height>
+    <width>481</width>
+    <height>376</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,7 +16,7 @@
   <widget class="QWidget" name="horizontalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>90</x>
+     <x>60</x>
      <y>330</y>
      <width>405</width>
      <height>36</height>
@@ -54,34 +54,142 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>482</width>
-     <height>311</height>
+     <width>461</width>
+     <height>320</height>
     </rect>
    </property>
-   <layout class="QFormLayout" name="formLayout_2">
-    <item row="1" column="0">
+   <layout class="QFormLayout" name="formLayout">
+    <property name="verticalSpacing">
+     <number>4</number>
+    </property>
+    <item row="0" column="0">
      <widget class="QRadioButton" name="turningRadioButton">
       <property name="text">
-       <string>Поворот на угол (в градусах):</string>
+       <string extracomment="координатной плоксости в положительном направлении относительно одной из осей вокруг начала координат">Поворот (в градусах)</string>
       </property>
      </widget>
     </item>
-    <item row="1" column="1">
-     <widget class="QLineEdit" name="turningAngleEdit">
-      <property name="text">
-       <string>0</string>
-      </property>
-     </widget>
+    <item row="0" column="1">
+     <layout class="QFormLayout" name="formLayout_2">
+      <item row="0" column="0">
+       <widget class="QGroupBox" name="groupBox">
+        <property name="minimumSize">
+         <size>
+          <width>102</width>
+          <height>91</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>вокруг оси</string>
+        </property>
+        <widget class="QWidget" name="verticalLayoutWidget">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>20</y>
+           <width>84</width>
+           <height>65</height>
+          </rect>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QRadioButton" name="turningOxyRadioButton">
+            <property name="text">
+             <string>Oz</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="turningOxzRadioButton">
+            <property name="text">
+             <string>Oy</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="turningOyzRadioButton">
+            <property name="text">
+             <string>Ox</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QGroupBox" name="groupBox_2">
+        <property name="title">
+         <string>на угол </string>
+        </property>
+        <widget class="QLineEdit" name="turningAngleEdit">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>40</y>
+           <width>101</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </widget>
+      </item>
+     </layout>
     </item>
-    <item row="2" column="0">
+    <item row="1" column="0">
      <widget class="QRadioButton" name="homothetyRadioButton">
       <property name="text">
        <string>Растяжение (натуральное число раз)</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="1">
-     <layout class="QFormLayout" name="formLayout">
+    <item row="1" column="1">
+     <layout class="QGridLayout" name="homothetyLayout">
+      <item row="2" column="0">
+       <widget class="QCheckBox" name="homothetyOzCheckBox">
+        <property name="text">
+         <string>по оси OZ в</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QCheckBox" name="homothetyCompressionOzCheckBox">
+        <property name="text">
+         <string>сжать</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QCheckBox" name="homothetyCompressionOxCheckBox">
+        <property name="text">
+         <string>сжать</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="homothetyOyEdit">
+        <property name="text">
+         <string>1</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QCheckBox" name="homothetyCompressionOyCheckBox">
+        <property name="text">
+         <string>сжать</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="homothetyOzEdit">
+        <property name="text">
+         <string>1</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="1">
        <widget class="QLineEdit" name="homothetyOxEdit">
         <property name="text">
@@ -89,31 +197,10 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QCheckBox" name="homothetyCompressionOxCheckBox">
-        <property name="text">
-         <string>сжать</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
+      <item row="1" column="0">
        <widget class="QCheckBox" name="homothetyOyCheckBox">
         <property name="text">
          <string>по оси OY в</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="homothetyOyEdit">
-        <property name="text">
-         <string>1</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QCheckBox" name="homothetyCompressionOyCheckBox">
-        <property name="text">
-         <string>сжать</string>
         </property>
        </widget>
       </item>
@@ -126,15 +213,15 @@
       </item>
      </layout>
     </item>
-    <item row="3" column="0">
+    <item row="2" column="0">
      <widget class="QRadioButton" name="symmetryRadioButton">
       <property name="text">
        <string>Симметрия</string>
       </property>
      </widget>
     </item>
-    <item row="3" column="1">
-     <layout class="QVBoxLayout" name="verticalLayout">
+    <item row="2" column="1">
+     <layout class="QVBoxLayout" name="symmetryLayout">
       <item>
        <widget class="QCheckBox" name="symmetryOxCheckBox">
         <property name="text">
@@ -149,21 +236,28 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QCheckBox" name="symmetryOzCheckBox">
+        <property name="text">
+         <string>по оси OZ</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
-    <item row="4" column="0">
+    <item row="3" column="0">
      <widget class="QRadioButton" name="translationRadioButton">
       <property name="text">
        <string>Сдвиг начала координат в точку</string>
       </property>
      </widget>
     </item>
-    <item row="4" column="1">
-     <layout class="QFormLayout" name="formLayout_3">
+    <item row="3" column="1">
+     <layout class="QFormLayout" name="translationLayout">
       <item row="0" column="0">
        <widget class="QLabel" name="xLabel">
         <property name="text">
-         <string>x = </string>
+         <string>  x = </string>
         </property>
        </widget>
       </item>
@@ -177,7 +271,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="yLabel">
         <property name="text">
-         <string>y = </string>
+         <string>  y = </string>
         </property>
        </widget>
       </item>
@@ -188,10 +282,30 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="zLabel">
+        <property name="text">
+         <string>  z = </string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="translationZEdit">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>
   </widget>
+  <zorder>horizontalLayoutWidget</zorder>
+  <zorder>formLayoutWidget_2</zorder>
+  <zorder></zorder>
+  <zorder>radioButton</zorder>
+  <zorder>turningAngleEdit</zorder>
+  <zorder>turningAngleEdit</zorder>
  </widget>
  <resources/>
  <connections>
@@ -202,8 +316,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>421</x>
+     <y>336</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -218,8 +332,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>463</x>
+     <y>336</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

@@ -1,7 +1,4 @@
 
-#include <float.h>
-#include <math.h>
-
 #include <QtGlobal>
 #include <QtGui>
 #include <QList>
@@ -131,71 +128,7 @@ onlyOnePoint:
         return;
     }
 }
-void swap_rows(double *T, int i, int j) {
-    double s;
-    for (int k = 0; k < ORD; k++) {
-        s = T[i*ORD+k];
-        T[i*ORD+k] = T[j*ORD+k];
-        T[j*ORD+k] = s;
-    }
-}
-void lin_comb_rows(double *T, int i, int j, double a)
-{
-    for (int k = 0; k < ORD; k++)
-        T[i*ORD+k] += a*T[j*ORD+k];
-}
-void div_rows(double *T, int i, double div)
-{
-    for (int j = 0; j < ORD; j++)
-        T[i*ORD+j] /= div;
-}
 
-double *inverse(double T[])
-{
-    // единичная матрица
-    double *U = new double[SIZE];
-    for (int i = 0; i < SIZE; i++) U[i] = 0;
-    for (int i = 0; i < ORD; i++) U[i+i*ORD] = 1;
-
-    bool find = false;
-    for (int i = 0; i < ORD; i++) {
-        // ищем ненулевой элемент в i-ом столбце
-        // сначала проверяем i-ую строку
-        if (T[i*ORD + i] == 0) {
-            // потом все строки под ней
-            for (int j = i+1; j < ORD; j++) {
-                // если нашли нужную, меняем с i-ой
-                if (T[j*ORD + i] != 0) {
-                    swap_rows(T, i, j);
-                    swap_rows(U, i, j);
-                    find = true;
-                }
-            }
-            // иначе, матрица необратима
-            if (!find) {
-                delete []U;
-                return NULL;
-            }
-        }
-        // вычитаем из строк ниже i-ую умноженную на такой коэффициент, чтобы получить столбец нулей (ниже)
-        double div = T[i*ORD+i];
-        for (int j = i+1; j < ORD; j++) {
-            lin_comb_rows(U, j, i, -T[j*ORD+i]/div);
-            lin_comb_rows(T, j, i, -T[j*ORD+i]/div);
-        }
-    }
-    // обратный ход, переход к единичной матрице
-    for (int i = ORD-1; i >= 0; i--) {
-        double div = T[i*ORD+i];
-        for (int j = i-1; j >= 0; j--) {
-            lin_comb_rows(U, j, i, -T[j*ORD+i]/div);
-            lin_comb_rows(T, j, i, -T[j*ORD+i]/div);
-        }
-        T[i*ORD+i] = 1.0;
-        U[i*ORD+i] /= div;
-    }
-    return U;
-}
 bool MatrixOfTransformation::helper(QList<Point> &src, QList<Point> &dst)
 {
     // Определяем преобразование по множеству точек совмещения:
@@ -215,8 +148,8 @@ bool MatrixOfTransformation::helper(QList<Point> &src, QList<Point> &dst)
     double MXX[SIZE] = { 0 }, MUX[SIZE] = { 0 };    // n x n
     for (long k = 0; k < count; k++)
     {
-        long X[ORD] = { src[k].X(0), src[k].X(1), src[k].X(2) };
-        long U[ORD] = { dst[k].X(0), dst[k].X(1), dst[k].X(2) };
+        const long *X = src[k].X();
+        const long *U = dst[k].X();
         for (int i = 0; i < ORD; i++) {
             MX[i] += X[i];
             MU[i] += U[i];
@@ -239,42 +172,15 @@ bool MatrixOfTransformation::helper(QList<Point> &src, QList<Point> &dst)
     return true;
 }
 
-Point *MatrixOfTransformation::transformPoint(long x, long y, long z)
+Point MatrixOfTransformation::transformPoint(long x[])
 {
-    //Point *p = new Point(x, y, z);
-    //return transformPoint(p);
-}
-long sign(double x) {
-    if (x == 0) return 0;
-    return x < 0 ? -1 : 1;
-}
-double abs(double x) {
-    return x*sign(x);
-}
-long abs(long x) {
-    return x*sign(x*1.0);
+    Point p(x);
+    return transformPoint(p);
 }
 
-long toLong(double x)
+Point MatrixOfTransformation::transformPoint(Point p)
 {
-    long y = lrint(x);
-//    qDebug("%.2lf %ld %.2lf", x, y, (abs(x) - abs(y)));
-    double  xy = abs(x) - abs(y),
-            epsilon = DBL_EPSILON*fmax(abs(x), fmax(1, abs(y)));
-    if ( xy > epsilon )
-        y += sign(x);
-    return y;
-}
-
-Point *MatrixOfTransformation::transformPoint(Point *p, bool resInThis)
-{
-    long u = toLong(_T[0]*p->X(0)) + toLong(_T[1]*p->X(1)) + toLong(_T[2]*p->X(2));
-    long v = toLong(_T[3]*p->X(0)) + toLong(_T[4]*p->X(1)) + toLong(_T[5]*p->X(2));
-    long w = toLong(_T[6]*p->X(0)) + toLong(_T[7]*p->X(1)) + toLong(_T[8]*p->X(2));
-    //Point *t = new Point(u, v, w);
-    //if (!resInThis) return t;
-    //delete p;
-    //return p=t;
+    return (*this)*(p);
 }
 
 double MatrixOfTransformation::det()

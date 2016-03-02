@@ -11,7 +11,6 @@ DialogAboutTestMatrix::DialogAboutTestMatrix(QWidget *parent) :
     ui(new Ui::DialogAboutTestMatrix)
 {
     ui->setupUi(this);
-    U = new double [SIZE];
     for (int i = 0; i < SIZE; i++) U[i] = 0;
     for (int i = 0; i < ORD; i++) U[i+ORD*i] = 1; // E-matrix
     connect(ui->applyButton, SIGNAL(clicked()), this, SLOT(apply()));
@@ -21,7 +20,6 @@ DialogAboutTestMatrix::DialogAboutTestMatrix(QWidget *parent) :
 DialogAboutTestMatrix::~DialogAboutTestMatrix()
 {
     delete ui;
-    delete []U;
 }
 
 void DialogAboutTestMatrix::accept()
@@ -34,10 +32,10 @@ void DialogAboutTestMatrix::apply()
 {
     double W[SIZE] = {  1, 0, 0,
                         0, 1, 0,
-                        0, 1, 0};
+                        0, 0, 1 };
     if(ui->homothetyRadioButton->isChecked()) {
         qDebug("homothety is selected");
-        double ox = 1, oy = 1;
+        double ox = 1, oy = 1, oz = 1;
         if(ui->homothetyOxCheckBox->isChecked()) {
             ox = ui->homothetyOxEdit->text().toInt();
             if (ox == 0) {
@@ -56,36 +54,44 @@ void DialogAboutTestMatrix::apply()
             }
             if(ui->homothetyCompressionOyCheckBox->isChecked()) oy = 1/oy;
         }
-        W[0] *= ox; W[3] *= ox;
-        W[1] *= oy; W[4] *= oy;
+        if(ui->homothetyOzCheckBox->isChecked()) {
+            oy = ui->homothetyOzEdit->text().toInt();
+            if (oy == 0) {
+                QMessageBox::about(0, tr("Коэффициент подобия равен нулю!"),
+                                     tr("Коэффициент подобия по оси OZ равен нулю!"));
+                return;
+            }
+            if(ui->homothetyCompressionOzCheckBox->isChecked()) oz = 1/oz;
+        }
+
+        for (int i = 0; i < ORD; i++) {
+            W[i*ORD] *= ox;
+            W[i*ORD+1] *= oy;
+            W[i*ORD+2] *= oz;
+        }
     }
     if(ui->symmetryRadioButton->isChecked()) {
         qDebug("symmetry is selected");
-        int ox = 1, oy = 1;
+        int ox = 1, oy = 1, oz = 1;
         if(ui->symmetryOxCheckBox->isChecked()) ox = -1;
         if(ui->symmetryOyCheckBox->isChecked()) oy = -1;
-        W[0] *= ox; W[3] *= ox;
-        W[1] *= oy; W[4] *= oy;
-    }
-    if(ui->translationRadioButton->isChecked()) {
-        qDebug("translation is selected");
-        double x, y;
-        x = ui->translationXEdit->text().toInt();
-        y = ui->translationYEdit->text().toInt();
-        W[2] = x;
-        W[5] = y;
+        if(ui->symmetryOzCheckBox->isChecked()) oz = -1;
+        for (int i = 0; i < ORD; i++) {
+            W[i*ORD] *= ox;
+            W[i*ORD+1] *= oy;
+            W[i*ORD+2] *= oz;
+        }
     }
     if(ui->turningRadioButton->isChecked()) {
+///////////////////////////////
         qDebug("turning is selected");
         double angle = 0;
         angle = ui->turningAngleEdit->text().toDouble(); //в градусах
         angle = (angle*M_PI)/180; //в радианах
-        W[0] = cos(angle);
-        W[1] = -sin(angle);
-        W[3] = sin(angle);
-        W[4] = cos(angle);
+
     }
-    double V[6];
+    double V[SIZE];
+
     V[0] = W[0]*U[0] + W[1]*U[3];
     V[1] = W[0]*U[1] + W[1]*U[4];
     V[2] = W[0]*U[2] + W[1]*U[5] + W[2];
@@ -107,19 +113,27 @@ void DialogAboutTestMatrix::clearEnter()
     ui->homothetyRadioButton->setChecked(false);
     ui->homothetyOxCheckBox->setChecked(false);
     ui->homothetyOyCheckBox->setChecked(false);
+    ui->homothetyOzCheckBox->setChecked(false);
     ui->homothetyCompressionOxCheckBox->setChecked(false);
     ui->homothetyCompressionOyCheckBox->setChecked(false);
+    ui->homothetyCompressionOzCheckBox->setChecked(false);
     ui->homothetyOxEdit->setText("1");
     ui->homothetyOyEdit->setText("1");
+    ui->homothetyOzEdit->setText("1");
 
     ui->symmetryRadioButton->setChecked(false);
     ui->symmetryOxCheckBox->setChecked(false);
     ui->symmetryOyCheckBox->setChecked(false);
+    ui->symmetryOzCheckBox->setChecked(false);
 
     ui->translationRadioButton->setChecked(false);
     ui->translationXEdit->setText("0");
     ui->translationYEdit->setText("0");
+    ui->translationZEdit->setText("0");
 
     ui->turningRadioButton->setChecked(false);
+    ui->turningOxyRadioButton->setChecked(false);
+    ui->turningOxzRadioButton->setChecked(false);
+    ui->turningOyzRadioButton->setChecked(false);
     ui->turningAngleEdit->setText("0");
 }

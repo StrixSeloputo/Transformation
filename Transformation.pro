@@ -19,7 +19,8 @@ SOURCES += main.cpp\
         point.cpp \
         image.cpp \
         dialogaboutdot.cpp \
-        dialogabouttestmatrix.cpp
+        dialogabouttestmatrix.cpp \
+    helpfunction.cpp
 
 HEADERS  += mainwindow.h \
         matrixoftransformation.h \
@@ -27,7 +28,8 @@ HEADERS  += mainwindow.h \
         point.h \
         image.h \
         dialogaboutdot.h \
-        dialogabouttestmatrix.h
+        dialogabouttestmatrix.h \
+    helpfunction.h
 
 FORMS    += mainwindow.ui \
         image.ui \

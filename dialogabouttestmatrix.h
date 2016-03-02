@@ -21,7 +21,7 @@ signals:
     void readyTestMatrix(double *U);
 private:
     Ui::DialogAboutTestMatrix *ui;
-    double *U;
+    double U[SIZE];
 private slots:
     void clearEnter();
     void apply();

@@ -22,9 +22,11 @@ public:
     QString showMatrix();
     bool    isEq(MatrixOfTransformation *m);
     bool    isEq(double *U);
-    Point *transformPoint(long x, long y, long z);
-    Point *transformPoint(Point *p, bool resInThis = true);
+    Point transformPoint(long x[]);
+    Point transformPoint(Point p);
     Point *setNewValue(QList<Point>src, QList<Point>dst);
+
+    long toLong(double x);
 
 //public slots:
     void mulOnTestMatrix(double U[]);
