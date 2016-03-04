@@ -1,10 +1,12 @@
 
+#include <QDebug>
 #include <QtGlobal>
 #include <QtGui>
 #include <QList>
 #include <QMessageBox>
 #include <QObject>
 
+#include "helpfunction.h"
 #include "matrixoftransformation.h"
 #include "point.h"
 
@@ -14,22 +16,6 @@ MatrixOfTransformation::MatrixOfTransformation()
     for (int i = 0; i < SIZE; i++) _T[i] = 0;
     for (int i = 0; i < ORD; i++) _T[i+ORD*i] = 1;
 }
-
-MatrixOfTransformation::MatrixOfTransformation(double U[])
-{
-    try {
-        for (int i = 0; i < SIZE; i++)
-            _T[i] = U[i];
-    } catch (...) {
-        qFatal("Invalid initialization MatrixOfTransformation::MatrixOfTransformation(double[])");
-    }
-}
-
-double MatrixOfTransformation::T(int i, int j) const
-{
-    return _T[i*ORD+j];
-}
-
 MatrixOfTransformation::MatrixOfTransformation(QList<Point> src, QList<Point> dst)
 {
     if (helper(src, dst)) return;
@@ -128,8 +114,28 @@ onlyOnePoint:
         return;
     }
 }
+MatrixOfTransformation::MatrixOfTransformation(double U[])
+{
+    try {
+        for (int i = 0; i < SIZE; i++)
+            _T[i] = U[i];
+    } catch (...) {
+        qFatal("Invalid initialization MatrixOfTransformation::MatrixOfTransformation(double[])");
+    }
+}
 
-bool MatrixOfTransformation::helper(QList<Point> &src, QList<Point> &dst)
+double                  MatrixOfTransformation::det()
+{
+//////////////////////
+    return _T[0]*(_T[4]*_T[8]-_T[5]*_T[7]) - _T[1]*(_T[3]*_T[8]-_T[5]*_T[6]) + _T[2]*(_T[3]*_T[7]-_T[4]*_T[6]);
+}
+MatrixOfTransformation *MatrixOfTransformation::getInverseMatrix()
+{
+    MatrixOfTransformation *M = new MatrixOfTransformation();
+    M->setMatrix(HelpFunction::inverse(_T));
+    return M;
+}
+bool                    MatrixOfTransformation::helper(QList<Point> &src, QList<Point> &dst)
 {
     // Определяем преобразование по множеству точек совмещения:
     // если точек < 3 или точки коллинеарны, то false и выход
@@ -161,7 +167,7 @@ bool MatrixOfTransformation::helper(QList<Point> &src, QList<Point> &dst)
     }
 
     // вычисляем (XX^t)^(-1)
-    double *InvXX = inverse(MXX);
+    double *InvXX = HelpFunction::inverse(MXX);
     for (int i = 0; i < ORD; i++) {
         for (int j = 0; j < ORD; j++) {
             _T[i*ORD+j] = 0;
@@ -171,60 +177,21 @@ bool MatrixOfTransformation::helper(QList<Point> &src, QList<Point> &dst)
     }
     return true;
 }
-
-Point MatrixOfTransformation::transformPoint(long x[])
-{
-    Point p(x);
-    return transformPoint(p);
-}
-
-Point MatrixOfTransformation::transformPoint(Point p)
-{
-    return (*this)*(p);
-}
-
-double MatrixOfTransformation::det()
-{
-//////////////////////
-    return _T[0]*(_T[4]*_T[8]-_T[5]*_T[7]) - _T[1]*(_T[3]*_T[8]-_T[5]*_T[6]) + _T[2]*(_T[3]*_T[7]-_T[4]*_T[6]);
-}
-MatrixOfTransformation *MatrixOfTransformation::getInverseMatrix()
-{
-    MatrixOfTransformation *M = new MatrixOfTransformation();
-    M->setMatrix(inverse(_T));
-    return M;
-}
-
-QString MatrixOfTransformation::showMatrix()
-{
-    return showMatrix(_T);
-}
-QString MatrixOfTransformation::showMatrix(double U[])
-{
-    QString s = "";
-    for (int i = 0; i < SIZE; i++) {
-        if (i % ORD == 2)
-            s.append(QString::asprintf("\t%.2lf\n", U[i]));
-        else
-            s.append(QString::asprintf("\t%.2lf", U[i]));
-    }
-    return s;
-}
-
-bool MatrixOfTransformation::isEq(MatrixOfTransformation *m)
+///
+bool                    MatrixOfTransformation::isEq(MatrixOfTransformation *m)
 {
     bool eq = true;
     for(int i = 0; i < SIZE; i++) eq &= (_T[i] == m->_T[i]);
     return eq;
 }
-bool MatrixOfTransformation::isEq(double *U)
+bool                    MatrixOfTransformation::isEq(double *U)
 {
     bool eq = true;
     for(int i = 0; i < SIZE; i++) eq &= (_T[i] == U[i]);
     return eq;
 }
-
-void MatrixOfTransformation::mulOnTestMatrix(double U[])
+///
+void                    MatrixOfTransformation::mulOnTestMatrix(double U[])
 {
     // W = UT
     double W[SIZE];
@@ -237,8 +204,26 @@ void MatrixOfTransformation::mulOnTestMatrix(double U[])
     }
     for(int i = 0; i < SIZE; i++) _T[i] = W[i];
 }
-void MatrixOfTransformation::setMatrix(double *U)
+void                    MatrixOfTransformation::setMatrix(double *U)
 {
-    qDebug() << showMatrix(U);
+    qDebug() << HelpFunction::showMatrix(U).toLatin1().data();
     for (int i = 0; i < SIZE; i++) _T[i] = U[i];
 }
+QString                 MatrixOfTransformation::showMatrix()
+{
+    return HelpFunction::showMatrix(_T);
+}
+double                  MatrixOfTransformation::T(int i, int j) const
+{
+    return _T[i*ORD+j];
+}
+Point                   MatrixOfTransformation::transformPoint(long x[])
+{
+    Point p(x);
+    return transformPoint(p);
+}
+Point                   MatrixOfTransformation::transformPoint(Point p)
+{
+    return (*this)*(p);
+}
+

@@ -29,7 +29,8 @@ HEADERS  += mainwindow.h \
         image.h \
         dialogaboutdot.h \
         dialogabouttestmatrix.h \
-    helpfunction.h
+    helpfunction.h \
+    constdef.h
 
 FORMS    += mainwindow.ui \
         image.ui \

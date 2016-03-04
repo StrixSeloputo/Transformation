@@ -8,11 +8,11 @@
 QString filename;
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-void MessageHandlerToFile(QtMsgType type, const QMessageLogContext &, const QString & str)
+void    MessageHandlerToFile(QtMsgType type, const QMessageLogContext &, const QString & str)
 {
     const char * msg = str.toStdString().c_str();
 #else
-void MessageHandlerToFile(QtMsgType type, const char *msg)
+void    MessageHandlerToFile(QtMsgType type, const char *msg)
 {
 #endif
     QString txt;
@@ -48,7 +48,6 @@ int main( int argc, char * argv[] )
 //#else
 //    qInstallMsgHandler(MessageHandlerToFile);
 //#endif
-
     QApplication a(argc, argv);
     MainWindow w;
     w.show();

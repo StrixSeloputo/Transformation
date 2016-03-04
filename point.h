@@ -1,8 +1,7 @@
 #ifndef POINT_H
 #define POINT_H
 
-#define     SIZE    9
-#define     DIM     3
+#include "constdef.h"
 
 class MatrixOfTransformation;
 

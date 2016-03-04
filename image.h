@@ -1,11 +1,9 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
-#define ORIGINAL_IMAGE          0x0
-#define TRANSFORMED_IMAGE       0x1
-#define TRANSFORMED_BACK_IMAGE  0x2
-
 #include <QMainWindow>
+
+#include "constdef.h"
 
 class QLabel;
 class QScrollArea;

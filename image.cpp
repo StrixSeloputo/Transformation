@@ -44,7 +44,6 @@ Image::Image(QWidget *parent, MainWindow *parentWindow, int flag) :
     pict = new Picture();
     resize(650, 650);
 }
-
 Image::~Image()
 {
     delete ui;
@@ -52,27 +51,22 @@ Image::~Image()
     delete imageScrollArea;
 }
 
-void Image::setImage(QImage &img)
+void    Image::adjustScrollBar(QScrollBar *scrollBar, double factor)
 {
-    QPixmap pixmap = QPixmap::fromImage(img);
-    pict->setImage(img);
-    imageLabel->setPixmap(pixmap);
-    scaleFactor = 1.0;
-    normalSize();
-    resize(img.width(), img.height());
+    scrollBar->setValue(int(factor * scrollBar->value()
+                            + ((factor - 1) * scrollBar->pageStep()/2)));
 }
-
-void Image::zoomIn() { scaleImage(1.25); }
-
-void Image::zoomOut() { scaleImage(0.8); }
-
-void Image::normalSize()
+Image  *Image::getNewImage(Image *dst)
+{
+   pict->getNewImage(dst);
+   return dst;
+}
+void    Image::normalSize()
 {
     imageLabel->adjustSize();
     scaleFactor = 1.0;
 }
-
-void Image::scaleImage(double factor)
+void    Image::scaleImage(double factor)
 {
     Q_ASSERT(imageLabel->pixmap());
     scaleFactor *= factor;
@@ -81,19 +75,22 @@ void Image::scaleImage(double factor)
     adjustScrollBar(imageScrollArea->horizontalScrollBar(), factor);
     adjustScrollBar(imageScrollArea->verticalScrollBar(), factor);
 }
-
-void Image::adjustScrollBar(QScrollBar *scrollBar, double factor)
+void    Image::setImage(QImage &img)
 {
-    scrollBar->setValue(int(factor * scrollBar->value()
-                            + ((factor - 1) * scrollBar->pageStep()/2)));
+    QPixmap pixmap = QPixmap::fromImage(img);
+    pict->setImage(img);
+    imageLabel->setPixmap(pixmap);
+    scaleFactor = 1.0;
+    normalSize();
+    resize(img.width(), img.height());
 }
-void Image::saveImage(QString flname)
+void    Image::saveImage(QString flname)
 {
     QImage img = pict->getImage();
     QDateTime curdt = QDateTime::currentDateTime();
     img.save(flname+"_"+curdt.toString(Qt::ISODate), "JPG");
 }
-void Image::setNewMatrix(DialogAboutDot *dialog)
+void    Image::setNewMatrix(DialogAboutDot *dialog)
 {
     QList<Point> src = dialog->getListSrc();
     QList<Point> dst = dialog->getListDst();
@@ -102,21 +99,17 @@ void Image::setNewMatrix(DialogAboutDot *dialog)
     pict->setMatrix(matrix);
     matrix->showMatrix();
 }
-void Image::setNewMatrix(MatrixOfTransformation *m)
+void    Image::setNewMatrix(MatrixOfTransformation *m)
 {
     pict->setMatrix(m);
 }
-
 QString Image::showMatrix()
 {
     return pict->showMatrix();
 }
-Image *Image::getNewImage(Image *dst)
-{
-   pict->getNewImage(dst);
-   return dst;
-}
-void Image::setTestMatrix(double *U)
+void    Image::setTestMatrix(double *U)
 {
     pict->setTestMatrix(U);
 }
+void    Image::zoomIn() { scaleImage(1.25); }
+void    Image::zoomOut() { scaleImage(0.8); }

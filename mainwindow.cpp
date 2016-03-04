@@ -66,6 +66,13 @@ MainWindow::~MainWindow()
     delete fileMenu;
     delete transformMenu;
 }
+
+void MainWindow::enterRefPoint()
+{
+    DialogAboutDot *dialog = new DialogAboutDot();
+    connect(dialog, SIGNAL(acceptEnterRefPoint(DialogAboutDot*)), original, SLOT(setNewMatrix(DialogAboutDot*)));
+    dialog->show();
+}
 void MainWindow::createActions()
 {
     enterRefPointAct = new QAction(tr("Enter Reference Point"), this);
@@ -112,7 +119,6 @@ void MainWindow::createActions()
     zoomOutAct->setEnabled(false);
     connect(zoomOutAct, SIGNAL(triggered()), this, SLOT(zoomOut()));
 }
-
 void MainWindow::createMenus()
 {
     fileMenu = new QMenu(tr("File"), this);
@@ -137,13 +143,6 @@ void MainWindow::createMenus()
     menuBar()->addMenu(fileMenu);
     menuBar()->addMenu(viewMenu);
     menuBar()->addMenu(transformMenu);
-}
-/////////////////////////
-void MainWindow::enterRefPoint()
-{
-    DialogAboutDot *dialog = new DialogAboutDot();
-    connect(dialog, SIGNAL(acceptEnterRefPoint(DialogAboutDot*)), original, SLOT(setNewMatrix(DialogAboutDot*)));
-    dialog->show();
 }
 void MainWindow::normalSize()
 {
@@ -182,6 +181,12 @@ void MainWindow::saveTransfImg()
     str_matrix.replace(QRegExp("[^\\w]+"), "_");
     emit saveImages(imgfilename+str_matrix);
 }
+void MainWindow::setTestMatrix()
+{
+    DialogAboutTestMatrix *dialog = new DialogAboutTestMatrix();
+    connect(dialog, SIGNAL(readyTestMatrix(double *)), original, SLOT(setTestMatrix(double *)));
+    dialog->show();
+}
 void MainWindow::showMatrix()
 {
     QString info_about_matrix1 = original->showMatrix();
@@ -194,18 +199,11 @@ void MainWindow::transform()
     original->getNewImage(transformed);
     saveTransfImgAct->setEnabled(true);
 }
-void MainWindow::setTestMatrix()
-{
-    DialogAboutTestMatrix *dialog = new DialogAboutTestMatrix();
-    connect(dialog, SIGNAL(readyTestMatrix(double *)), original, SLOT(setTestMatrix(double *)));
-    dialog->show();
-}
 void MainWindow::zoomIn()
 {
     original->zoomIn();
     transformed->zoomIn();
 }
-
 void MainWindow::zoomOut()
 {
     original->zoomOut();
